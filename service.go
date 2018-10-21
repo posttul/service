@@ -11,6 +11,7 @@ import (
 // the service without compromising the integrity of the router.
 type Service interface {
 	GetRoutes() Routes
+	InitRouter(*httprouter.Router) *httprouter.Router
 }
 
 // Start this will bind the service routes to the adddress passed
@@ -18,7 +19,7 @@ type Service interface {
 // of the service biding they should be define before the handler are
 // set to the Route to keep service consisten.
 func Start(addrs string, s Service) {
-	router := httprouter.New()
+	router := s.Router(httprouter.New())
 	for _, r := range s.GetRoutes() {
 		if log != nil {
 			log.Infof("Register endpoint %s with the method %s and handler %T \n", r.Path, r.Method, r.Handler)
