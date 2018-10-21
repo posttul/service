@@ -24,12 +24,24 @@ func (l *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	wl := &responseWriterLog{w, http.StatusOK}
 	l.handler.ServeHTTP(wl, r)
 	if log != nil {
-		log.WithFields(logrus.Fields{
+		entry := log.WithFields(logrus.Fields{
 			"Method": r.Method,
 			"Path":   r.URL,
 			"Status": wl.statusCode,
 			"Time":   time.Since(t),
-		}).Info("Request")
+		})
+		switch wl.statusCode {
+		case http.StatusOK:
+			entry.Info("ok")
+		case http.StatusInternalServerError:
+			entry.Error("error")
+		case http.StatusUnauthorized:
+			entry.Error("unauthorized")
+		case http.StatusForbidden:
+			entry.Error("forbidden")
+		default:
+			entry.Info("request")
+		}
 	}
 }
 

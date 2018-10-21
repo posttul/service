@@ -59,9 +59,20 @@ func Error(w io.Writer, r Response, wf Writer) {
 
 // Deny write the deny response.
 func Deny(w io.Writer, r Response, wf Writer) {
-	r.SetStatus("deny")
+	r.SetStatus("unauthorized")
 	if hw, ok := w.(http.ResponseWriter); ok {
 		hw.WriteHeader(http.StatusUnauthorized)
+		wf(hw, r)
+		return
+	}
+	wf(w, r)
+}
+
+// Forbid write the forbidden response.
+func Forbid(w io.Writer, r Response, wf Writer) {
+	r.SetStatus("forbidden")
+	if hw, ok := w.(http.ResponseWriter); ok {
+		hw.WriteHeader(http.StatusForbidden)
 		wf(hw, r)
 		return
 	}
