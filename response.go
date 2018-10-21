@@ -8,10 +8,11 @@ import (
 
 // Response interface is use to handle a service response.
 type Response interface {
-	OK(w io.Writer)
-	Error(w io.Writer)
-	Deny(w io.Writer)
+	SetStatus(status string)
 }
+
+// Writer is a func that can write a response to writer
+type Writer func(w io.Writer, r Response)
 
 // R basic response for json
 type R struct {
@@ -20,7 +21,8 @@ type R struct {
 	Err    error       `json:"error,omitempty"`
 }
 
-func (r R) json(w io.Writer) {
+// JSON a response to a writer.
+func JSON(w io.Writer, r Response) {
 	bts, err := json.Marshal(r)
 	if err != nil && log != nil {
 		log.Error(err)
@@ -28,35 +30,35 @@ func (r R) json(w io.Writer) {
 	io.WriteString(w, string(bts))
 }
 
-// OK write the ok response
-func (r R) OK(w io.Writer) {
-	r.Status = "ok"
+// OK a response to a writer.
+func OK(w io.Writer, r Response, wf Writer) {
+	r.SetStatus("ok")
 	if hw, ok := w.(http.ResponseWriter); ok {
 		hw.WriteHeader(http.StatusOK)
-		r.json(hw)
+		wf(hw, r)
 		return
 	}
-	r.json(w)
+	wf(w, r)
 }
 
-// Error write the error response
-func (r R) Error(w io.Writer) {
-	r.Status = "error"
+// Error set error status to response to a writer
+func Error(w io.Writer, r Response, wf Writer) {
+	r.SetStatus("error")
 	if hw, ok := w.(http.ResponseWriter); ok {
 		hw.WriteHeader(http.StatusInternalServerError)
-		r.json(hw)
+		wf(hw, r)
 		return
 	}
-	r.json(w)
+	wf(w, r)
 }
 
 // Deny write the deny response
-func (r R) Deny(w io.Writer) {
-	r.Status = "deny"
+func Deny(w io.Writer, r Response, wf Writer) {
+	r.SetStatus("deny")
 	if hw, ok := w.(http.ResponseWriter); ok {
 		hw.WriteHeader(http.StatusUnauthorized)
-		r.json(hw)
+		wf(hw, r)
 		return
 	}
-	r.json(w)
+	wf(w, r)
 }
