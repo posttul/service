@@ -34,7 +34,11 @@ func (l *logHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case http.StatusOK:
 			entry.Info("ok")
 		case http.StatusInternalServerError:
-			entry.Error("error")
+			entry.Error("internal error")
+		case http.StatusNotFound:
+			entry.Error("not found")
+		case http.StatusMethodNotAllowed:
+			entry.Error("method not allow")
 		case http.StatusUnauthorized:
 			entry.Error("unauthorized")
 		case http.StatusForbidden:
