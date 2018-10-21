@@ -19,7 +19,7 @@ type Service interface {
 // of the service biding they should be define before the handler are
 // set to the Route to keep service consisten.
 func Start(addrs string, s Service) {
-	router := s.Router(httprouter.New())
+	router := s.InitRouter(httprouter.New())
 	for _, r := range s.GetRoutes() {
 		if log != nil {
 			log.Infof("Register endpoint %s with the method %s and handler %T \n", r.Path, r.Method, r.Handler)
