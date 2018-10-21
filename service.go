@@ -34,10 +34,10 @@ func Start(addrs string, s Service) {
 	}
 }
 
-// Routes a slice of route
+// Routes a map of each Route on a Service.
 type Routes = map[string]Route
 
-// Route on the service
+// Route on a service.
 type Route struct {
 	Path    string
 	Method  string
