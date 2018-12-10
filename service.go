@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -20,6 +21,11 @@ type Service interface {
 // set to the Route to keep service consisten.
 func Start(addrs string, s Service) {
 	router := s.InitRouter(httprouter.New())
+
+	router.Handle(http.MethodGet, "/_ls", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		b, _ := json.Marshal(s.GetRoutes())
+		w.Write(b)
+	})
 	for _, r := range s.GetRoutes() {
 		if log != nil {
 			log.Infof("Register endpoint %s with the method %s and handler %T \n", r.Path, r.Method, r.Handler)
